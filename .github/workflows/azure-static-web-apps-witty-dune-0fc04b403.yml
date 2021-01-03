@@ -22,7 +22,7 @@ jobs:
       - name: PowerShell Script - update version number in project files
         shell: pwsh
         run: |
-          .\.build\UpdateVersion.ps1 -version ${{ github.run_number }}
+          .\.build\UpdateVersion.ps1 -version "0.1.${{ github.run_number }}""
 
       - name: Build And Deploy
         id: builddeploy
