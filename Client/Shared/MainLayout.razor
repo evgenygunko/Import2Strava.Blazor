@@ -1,0 +1,17 @@
+﻿@inherits LayoutComponentBase
+
+<div class="page">
+    <div class="sidebar">
+        <NavMenu />
+    </div>
+
+    <div class="main">
+        <div class="top-row px-4">
+            <MatButtonLink Href="http://www.strava.com/oauth/authorize?client_id=58800&response_type=code&redirect_uri=https://localhost:44397/exchange_token&approval_prompt=force&scope=read">Login</MatButtonLink>
+        </div>
+
+        <div class="content px-4">
+            @Body
+        </div>
+    </div>
+</div>
