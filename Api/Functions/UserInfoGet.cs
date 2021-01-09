@@ -22,7 +22,7 @@ namespace Api.Functions
 
         [FunctionName("UserInfoGet")]
         public static IActionResult Run(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "userinfo")] HttpRequest req,
+            [HttpTrigger(AuthorizationLevel.Function, "get", Route = "userinfo")] HttpRequest req,
             ILogger log)
         {
             log.LogInformation("C# HTTP trigger function processed a request.");
