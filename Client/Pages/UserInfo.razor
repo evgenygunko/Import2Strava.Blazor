@@ -1,3 +1,11 @@
 ﻿@page "/userinfo"
 
-<div>@UserDetails</div>
+<AuthorizeView>
+    <Authorized>
+        <div>@UserDetails</div>
+    </Authorized>
+
+    <NotAuthorized>
+        <p>Please login</p>
+    </NotAuthorized>
+</AuthorizeView>

@@ -25,12 +25,24 @@ namespace Api.Functions
             [HttpTrigger(AuthorizationLevel.Function, "get", Route = "userinfo")] HttpRequest req,
             ILogger log)
         {
-            log.LogInformation("C# HTTP trigger function processed a request.");
+            bool useMockData;
+            if (!bool.TryParse(System.Environment.GetEnvironmentVariable("UseMockData"), out useMockData))
+            {
+                useMockData = false;
+            }
+
+            if (useMockData)
+            {
+                log.LogInformation("Returning mock data: Hello Benedict Cumberbatch! Your user id: test123");
+                return new OkObjectResult($"Hello Benedict Cumberbatch! Your user id: test123");
+            }
 
             var principal = new ClientPrincipal();
 
             if (req.Headers.TryGetValue("x-ms-client-principal", out var header))
             {
+                log.LogInformation("Found 'x-ms-client-principal' header: " + header);
+
                 var data = header[0];
                 var decoded = Convert.FromBase64String(data);
                 var json = Encoding.ASCII.GetString(decoded);
@@ -39,11 +51,9 @@ namespace Api.Functions
                 string responseMessage = $"Hello {principal.UserDetails}! Your user id: {principal.UserId}";
                 return new OkObjectResult(responseMessage);
             }
-            else
-            {
-                log.LogError("The request doesn't have 'x-ms-client-principal' header. Cannot verify the user identity.");
-                return new NotFoundObjectResult("The request doesn't have 'x-ms-client-principal' header. Cannot verify the user identity.");
-            }
+
+            log.LogError("The request doesn't have 'x-ms-client-principal' header. Cannot verify the user identity.");
+            return new NotFoundObjectResult("The request doesn't have 'x-ms-client-principal' header. Cannot verify the user identity.");
         }
     }
 }

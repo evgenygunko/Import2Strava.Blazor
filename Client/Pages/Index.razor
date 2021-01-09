@@ -1,29 +1,38 @@
 ﻿@page "/"
-
-@if (!IsAuthenticated)
-{
-    <p>Please login</p>
-}
-else
-{
-    @if (Athlete == null)
+@*@if (!IsAuthenticated)
     {
-        <p><em>Loading...</em></p>
+        <p>Please login</p>
     }
     else
     {
-        <MatCard class="demo-mat-card">
-            <MatCardContent>
-                <MatCardMedia Wide="true" ImageUrl="@Athlete.Profile" Style="width:140px;height:140px;"></MatCardMedia>
-                <div class="demo-mat-card-content">
-                    <MatHeadline6 class="demo-mat-card-clean-margin">
-                        @Athlete.FirstName @Athlete.LastName
-                    </MatHeadline6>
-                    <MatSubtitle2 class="demo-mat-card-clean-margin">
-                        @Athlete.Country
-                    </MatSubtitle2>
-                </div>
-            </MatCardContent>
-        </MatCard>
-    }
-}
+        @if (Athlete == null)
+        {
+            <p><em>Loading...</em></p>
+        }
+        else
+        {
+            <MatCard class="demo-mat-card">
+                <MatCardContent>
+                    <MatCardMedia Wide="true" ImageUrl="@Athlete.Profile" Style="width:140px;height:140px;"></MatCardMedia>
+                    <div class="demo-mat-card-content">
+                        <MatHeadline6 class="demo-mat-card-clean-margin">
+                            @Athlete.FirstName @Athlete.LastName
+                        </MatHeadline6>
+                        <MatSubtitle2 class="demo-mat-card-clean-margin">
+                            @Athlete.Country
+                        </MatSubtitle2>
+                    </div>
+                </MatCardContent>
+            </MatCard>
+        }
+    }*@
+
+<AuthorizeView>
+    <Authorized>
+        <p>Welcome to Import2Strava!</p>
+    </Authorized>
+
+    <NotAuthorized>
+        <p>Please login</p>
+    </NotAuthorized>
+</AuthorizeView>
