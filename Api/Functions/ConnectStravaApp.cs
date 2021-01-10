@@ -14,31 +14,33 @@ using Newtonsoft.Json;
 
 namespace Api.Functions
 {
-    public class AccessTokenGet
+    public class ConnectStravaApp
     {
         private readonly HttpClient _httpClient;
         private readonly IConfiguration _configuration;
 
-        public AccessTokenGet(HttpClient httpClient, IConfiguration configuration)
+        public ConnectStravaApp(HttpClient httpClient, IConfiguration configuration)
         {
             _httpClient = httpClient;
             _configuration = configuration;
         }
 
-        [FunctionName("AccessTokenGet")]
+        [FunctionName("ConnectStravaApp")]
         public async Task<IActionResult> Run(
-            [HttpTrigger(AuthorizationLevel.Function, "get", Route = "accesstoken/{authorizationCode}")]
+            [HttpTrigger(AuthorizationLevel.Function, "post", Route = "connect")]
+            [FromBody] Shared.Models.ConnectStravaApp connectStravaApp,
             HttpRequest req,
-            string authorizationCode,
             ILogger logger)
         {
             ClientPrincipal clientPrincipal = AuthenticationHelper.GetClientPrincipal(req, logger);
 
-            string accessToken = await PerformCodeExchangeAsync(authorizationCode, clientPrincipal, logger);
-            return new OkObjectResult(accessToken);
+            AccessTokenModel accessTokenModel = await PerformCodeExchangeAsync(connectStravaApp.AuthorizationCode, clientPrincipal, logger);
+
+            // TODO: save token in the database
+            return new OkResult();
         }
 
-        private async Task<string> PerformCodeExchangeAsync(string code, ClientPrincipal clientPrincipal, ILogger logger)
+        private async Task<AccessTokenModel> PerformCodeExchangeAsync(string code, ClientPrincipal clientPrincipal, ILogger logger)
         {
             logger.LogInformation($"Exchanging code for tokens for client {clientPrincipal.UserId} {clientPrincipal.UserDetails}...");
 
@@ -60,7 +62,7 @@ namespace Api.Functions
             AccessTokenModel accessTokenModel = JsonConvert.DeserializeObject<AccessTokenModel>(responseBody);
             logger.LogTrace($"Access token: '{accessTokenModel.AccessToken}', expires at '{accessTokenModel.ExpiresAt}'");
 
-            return accessTokenModel.AccessToken;
+            return accessTokenModel;
         }
 
     }

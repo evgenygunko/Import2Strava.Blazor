@@ -28,6 +28,7 @@ namespace Client.Pages
             Logger.LogInformation($"Received authorization code='{AuthorizationCode}'");
 
             await DataService.ConnectStravaAppAsync(AuthorizationCode);
+            Logger.LogInformation($"Successfully connected Strava app");
 
             NavManager.NavigateTo("/");
         }

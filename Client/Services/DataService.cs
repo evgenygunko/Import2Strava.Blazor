@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Net.Http;
+using System.Text;
 using System.Threading.Tasks;
 using Client.Models;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
+using Shared.Models;
 
 namespace Client.Services
 {
@@ -29,7 +31,10 @@ namespace Client.Services
 
         public async Task ConnectStravaAppAsync(string authorizationCode)
         {
-            HttpResponseMessage response = await _httpClient.GetAsync(new Uri($"/api/accesstoken/{authorizationCode}", UriKind.Relative));
+            ConnectStravaApp connectStravaApp = new ConnectStravaApp() { AuthorizationCode = authorizationCode };
+            var json = JsonConvert.SerializeObject(connectStravaApp);
+
+            var response = await _httpClient.PostAsync(new Uri($"/api/connect", UriKind.Relative), new StringContent(json, UnicodeEncoding.UTF8, "application/json"));
 
             response.EnsureSuccessStatusCode();
         }
