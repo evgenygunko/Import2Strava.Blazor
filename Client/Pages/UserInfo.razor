@@ -1,0 +1,26 @@
+﻿@page "/userinfo"
+@attribute [Authorize]
+
+<AuthorizeView>
+    <Authorized>
+        @if (Error != null)
+        {
+            <div class="alert alert-danger" role="alert">@Error</div>
+        }
+        else
+        {
+            if (UserDetails == null)
+            {
+                <p><em>Loading...</em></p>
+            }
+            else
+            {
+                <div>@UserDetails</div>
+            }
+        }
+    </Authorized>
+
+    <NotAuthorized>
+        <p>Please login</p>
+    </NotAuthorized>
+</AuthorizeView>

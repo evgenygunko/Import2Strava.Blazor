@@ -1,6 +1,14 @@
 {
   "routes": [
     {
+      "route": "/api/version",
+      "allowedRoles": [ "anonymous" ]
+    },
+    {
+      "route": "/api/*",
+      "allowedRoles": [ "authenticated" ]
+    },
+    {
       "route": "/*",
       "serve": "/index.html",
       "statusCode": 200
