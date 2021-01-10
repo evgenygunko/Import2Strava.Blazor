@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using Client.Services;
 using Microsoft.AspNetCore.Components;
 
@@ -11,9 +12,19 @@ namespace Client.Pages
 
         public string UserDetails { get; set; }
 
+        public string Error { get; set; }
+
         protected override async Task OnInitializedAsync()
         {
-            UserDetails = await ClientService.GetUserDetailsAsync();
+            try
+            {
+                Error = null;
+                UserDetails = await ClientService.GetUserDetailsAsync();
+            }
+            catch (Exception ex)
+            {
+                Error = "An error occurred: " + ex;
+            }
         }
     }
 }
