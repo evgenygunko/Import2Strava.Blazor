@@ -1,7 +1,7 @@
 ﻿using System.Threading.Tasks;
-using Client.Models;
 using Client.Services;
 using Microsoft.AspNetCore.Components;
+using Shared.Models;
 
 namespace Client.Pages
 {

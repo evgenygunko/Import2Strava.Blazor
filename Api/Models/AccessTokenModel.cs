@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Globalization;
 using Newtonsoft.Json;
+using Shared.Models;
 
 namespace Api.Models
 {

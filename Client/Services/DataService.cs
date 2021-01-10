@@ -2,7 +2,6 @@
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
-using Client.Models;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Shared.Models;
