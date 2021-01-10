@@ -4,6 +4,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Api.Helpers;
 using Api.Models;
+using Api.Models.Data;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
@@ -30,13 +31,35 @@ namespace Api.Functions
             [HttpTrigger(AuthorizationLevel.Function, "post", Route = "connect")]
             [FromBody] Shared.Models.ConnectStravaApp connectStravaApp,
             HttpRequest req,
-            ILogger logger)
+            ILogger logger,
+            IAsyncCollector<LinkedAccount> outputTable)
         {
             ClientPrincipal clientPrincipal = AuthenticationHelper.GetClientPrincipal(req, logger);
 
             AccessTokenModel accessTokenModel = await PerformCodeExchangeAsync(connectStravaApp.AuthorizationCode, clientPrincipal, logger);
 
             // TODO: save token in the database
+            LinkedAccount linkedAccount = new LinkedAccount()
+            {
+                UserId = clientPrincipal.UserId,
+                UserDetails = clientPrincipal.UserDetails,
+                IdentityProvider = clientPrincipal.IdentityProvider,
+                StravaAccountId = accessTokenModel.Athlete.Id,
+                FirstName = accessTokenModel.Athlete.FirstName,
+                LastName = accessTokenModel.Athlete.LastName,
+                Profile = accessTokenModel.Athlete.Profile,
+                TokenType = accessTokenModel.TokenType,
+                AccessToken = accessTokenModel.AccessToken,
+                ExpiresAt = accessTokenModel.ExpiresAt,
+                RefreshToken = accessTokenModel.RefreshToken,
+            };
+
+            logger.LogInformation($"Saving access token for user: '{linkedAccount.UserId}' '{linkedAccount.UserDetails}'. Strava user:'{linkedAccount.StravaAccountId}' {linkedAccount.FirstName} {linkedAccount.LastName}");
+            linkedAccount.PartitionKey = "LinkedAccounts";
+            linkedAccount.RowKey = linkedAccount.UserId;
+
+            await outputTable.AddAsync(linkedAccount);
+
             return new OkResult();
         }
 
