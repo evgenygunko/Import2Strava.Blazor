@@ -27,12 +27,12 @@ namespace Api.Functions
         }
 
         [FunctionName("ConnectStravaApp")]
-        public async Task<IActionResult> Run(
+        [return: Table("LinkedAccounts")]
+        public async Task<LinkedAccount> Run(
             [HttpTrigger(AuthorizationLevel.Function, "post", Route = "connect")]
             [FromBody] Shared.Models.ConnectStravaApp connectStravaApp,
             HttpRequest req,
-            ILogger logger,
-            IAsyncCollector<LinkedAccount> outputTable)
+            ILogger logger)
         {
             ClientPrincipal clientPrincipal = AuthenticationHelper.GetClientPrincipal(req, logger);
 
@@ -58,9 +58,7 @@ namespace Api.Functions
             linkedAccount.PartitionKey = "LinkedAccounts";
             linkedAccount.RowKey = linkedAccount.UserId;
 
-            await outputTable.AddAsync(linkedAccount);
-
-            return new OkResult();
+            return linkedAccount;
         }
 
         private async Task<AccessTokenModel> PerformCodeExchangeAsync(string code, ClientPrincipal clientPrincipal, ILogger logger)
