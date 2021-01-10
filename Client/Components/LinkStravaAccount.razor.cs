@@ -3,7 +3,7 @@ using Microsoft.Extensions.Configuration;
 
 namespace Client.Components
 {
-    public partial class Login
+    public partial class LinkStravaAccount
     {
         [Inject]
         private IConfiguration Configuration { get; set; }

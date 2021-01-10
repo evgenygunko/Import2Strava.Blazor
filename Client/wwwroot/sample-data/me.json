@@ -1,6 +1,6 @@
 {
 	"clientPrincipal": {
-		"identityProvider": "github",
+		"identityProvider": "local-data",
 		"userId": "test123",
 		"userDetails": "Benedict Cumberbatch",
 		"userRoles": [

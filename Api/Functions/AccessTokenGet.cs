@@ -1,8 +1,8 @@
 using System;
-using System.Globalization;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
+using Api.Helpers;
 using Api.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -11,7 +11,6 @@ using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 
 namespace Api.Functions
 {
@@ -28,20 +27,20 @@ namespace Api.Functions
 
         [FunctionName("AccessTokenGet")]
         public async Task<IActionResult> Run(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "accesstoken/{authorizationCode}")]
+            [HttpTrigger(AuthorizationLevel.Function, "get", Route = "accesstoken/{authorizationCode}")]
             HttpRequest req,
             string authorizationCode,
             ILogger logger)
         {
-            string accessToken = await PerformCodeExchangeAsync(authorizationCode, logger);
+            ClientPrincipal clientPrincipal = AuthenticationHelper.GetClientPrincipal(req, logger);
+
+            string accessToken = await PerformCodeExchangeAsync(authorizationCode, clientPrincipal, logger);
             return new OkObjectResult(accessToken);
         }
 
-        private async Task<string> PerformCodeExchangeAsync(string code, ILogger logger)
+        private async Task<string> PerformCodeExchangeAsync(string code, ClientPrincipal clientPrincipal, ILogger logger)
         {
-            logger.LogInformation("Exchanging code for tokens...");
-
-            string accessToken = null;
+            logger.LogInformation($"Exchanging code for tokens for client {clientPrincipal.UserId} {clientPrincipal.UserDetails}...");
 
             ExchangeTokenModel exchangeTokenModel = new ExchangeTokenModel()
             {
@@ -57,20 +56,20 @@ namespace Api.Functions
             response.EnsureSuccessStatusCode();
 
             // reads response body
-            string responseText = await response.Content.ReadAsStringAsync();
-            logger.LogTrace(responseText);
+            string responseBody = await response.Content.ReadAsStringAsync();
+            logger.LogTrace($"Received token response from Strava: '{responseBody}'");
 
             // converts to dictionary
-            var data = (JObject)JsonConvert.DeserializeObject(responseText);
-            accessToken = data["access_token"].Value<string>();
-            string refreshToken = data["refresh_token"].Value<string>();
+            //var data = (JObject)JsonConvert.DeserializeObject(responseText);
+            //accessToken = data["access_token"].Value<string>();
+            //string refreshToken = data["refresh_token"].Value<string>();
 
-            DateTime jan1970 = Convert.ToDateTime("1970-01-01T00:00:00Z", CultureInfo.InvariantCulture);
-            DateTime expiresAt = jan1970.AddSeconds(data["expires_at"].Value<long>());
+            //DateTime jan1970 = Convert.ToDateTime("1970-01-01T00:00:00Z", CultureInfo.InvariantCulture);
+            //DateTime expiresAt = jan1970.AddSeconds(data["expires_at"].Value<long>());
+            AccessTokenModel accessTokenModel = JsonConvert.DeserializeObject<AccessTokenModel>(responseBody);
+            logger.LogTrace($"Access token: '{accessTokenModel.AccessToken}', expires at '{accessTokenModel.ExpiresAt}'");
 
-            logger.LogInformation("The tokens have been acquired.");
-
-            return accessToken;
+            return accessTokenModel.AccessToken;
         }
 
     }
