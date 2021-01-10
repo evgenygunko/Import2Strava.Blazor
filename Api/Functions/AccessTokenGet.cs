@@ -50,22 +50,13 @@ namespace Api.Functions
             };
             var json = JsonConvert.SerializeObject(exchangeTokenModel);
 
-            // builds the  request
             HttpResponseMessage response = await _httpClient.PostAsync(new Uri($"https://www.strava.com/oauth/token"), new StringContent(json, Encoding.UTF8, "application/json"));
 
             response.EnsureSuccessStatusCode();
 
-            // reads response body
             string responseBody = await response.Content.ReadAsStringAsync();
             logger.LogTrace($"Received token response from Strava: '{responseBody}'");
 
-            // converts to dictionary
-            //var data = (JObject)JsonConvert.DeserializeObject(responseText);
-            //accessToken = data["access_token"].Value<string>();
-            //string refreshToken = data["refresh_token"].Value<string>();
-
-            //DateTime jan1970 = Convert.ToDateTime("1970-01-01T00:00:00Z", CultureInfo.InvariantCulture);
-            //DateTime expiresAt = jan1970.AddSeconds(data["expires_at"].Value<long>());
             AccessTokenModel accessTokenModel = JsonConvert.DeserializeObject<AccessTokenModel>(responseBody);
             logger.LogTrace($"Access token: '{accessTokenModel.AccessToken}', expires at '{accessTokenModel.ExpiresAt}'");
 

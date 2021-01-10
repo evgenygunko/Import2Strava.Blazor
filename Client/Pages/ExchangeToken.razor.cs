@@ -1,7 +1,8 @@
 ﻿using System;
+using System.Threading.Tasks;
 using Client.Services;
 using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Web;
+using Microsoft.Extensions.Logging;
 
 namespace Client.Pages
 {
@@ -11,28 +12,24 @@ namespace Client.Pages
         private NavigationManager NavManager { get; set; }
 
         [Inject]
-        private IAuthenticationService AuthenticationService { get; set; }
+        private IDataService DataService { get; set; }
+
+        [Inject]
+        private ILogger<ExchangeToken> Logger { get; set; }
 
         public string AuthorizationCode { get; set; }
 
-        public string AccessToken { get; set; }
-
-        protected override void OnInitialized()
+        protected override async Task OnInitializedAsync()
         {
             var uriBuilder = new UriBuilder(NavManager.Uri);
             var queryStringParams = System.Web.HttpUtility.ParseQueryString(uriBuilder.Query);
+
             AuthorizationCode = queryStringParams["code"];
+            Logger.LogInformation($"Received authorization code='{AuthorizationCode}'");
 
-            //NavManager.NavigateTo("/");
-        }
+            await DataService.ConnectStravaAppAsync(AuthorizationCode);
 
-        private void GetAccessToken(MouseEventArgs e)
-        {
-            InvokeAsync(async () =>
-            {
-                AccessToken = await AuthenticationService.AuthenticateAsync(AuthorizationCode);
-                StateHasChanged();
-            });
+            NavManager.NavigateTo("/");
         }
     }
 }
