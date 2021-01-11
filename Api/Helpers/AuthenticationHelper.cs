@@ -23,6 +23,8 @@ namespace Api.Helpers
                     UserDetails = "Benedict Cumberbatch",
                     UserRoles = new List<string>() { "anonymous", "authenticated" }
                 };
+
+                logger.LogInformation($"Returning mock data: user id='{principal?.UserId}', user details='{principal?.UserDetails}', identity provider='{principal.IdentityProvider}'");
             }
             else
             {
@@ -33,6 +35,9 @@ namespace Api.Helpers
                     var json = Encoding.ASCII.GetString(decoded);
 
                     principal = JsonSerializer.Deserialize<ClientPrincipal>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+
+                    logger.LogInformation($"Found user: user id='{principal?.UserId}', user details='{principal?.UserDetails}', identity provider='{principal.IdentityProvider}'");
                 }
                 else
                 {
@@ -40,7 +45,6 @@ namespace Api.Helpers
                 }
             }
 
-            logger.LogInformation($"Returning mock data: user id='{principal?.UserId}', user details='{principal?.UserDetails}', identity provider='{principal.IdentityProvider}'");
             return principal;
         }
     }

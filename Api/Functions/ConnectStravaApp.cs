@@ -34,6 +34,8 @@ namespace Api.Functions
             HttpRequest req,
             ILogger logger)
         {
+            logger.LogInformation($"ConnectStravaApp function is called with AuthorizationCode: '{connectStravaApp.AuthorizationCode}'");
+
             ClientPrincipal clientPrincipal = AuthenticationHelper.GetClientPrincipal(req, logger);
 
             AccessTokenModel accessTokenModel = await PerformCodeExchangeAsync(connectStravaApp.AuthorizationCode, clientPrincipal, logger);
@@ -63,7 +65,7 @@ namespace Api.Functions
 
         private async Task<AccessTokenModel> PerformCodeExchangeAsync(string code, ClientPrincipal clientPrincipal, ILogger logger)
         {
-            logger.LogInformation($"Exchanging code for tokens for client {clientPrincipal.UserId} {clientPrincipal.UserDetails}...");
+            logger.LogInformation($"Exchanging authorization code '{code}' for tokens for client {clientPrincipal.UserId} {clientPrincipal.UserDetails}...");
 
             ExchangeTokenModel exchangeTokenModel = new ExchangeTokenModel()
             {
@@ -78,10 +80,10 @@ namespace Api.Functions
             response.EnsureSuccessStatusCode();
 
             string responseBody = await response.Content.ReadAsStringAsync();
-            logger.LogTrace($"Received token response from Strava: '{responseBody}'");
+            logger.LogInformation($"Received token response from Strava: '{responseBody}'");
 
             AccessTokenModel accessTokenModel = JsonConvert.DeserializeObject<AccessTokenModel>(responseBody);
-            logger.LogTrace($"Access token: '{accessTokenModel.AccessToken}', expires at '{accessTokenModel.ExpiresAt}'");
+            logger.LogInformation($"Parsed Access token: '{accessTokenModel.AccessToken}', expires at '{accessTokenModel.ExpiresAt}'");
 
             return accessTokenModel;
         }
