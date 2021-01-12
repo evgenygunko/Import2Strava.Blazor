@@ -47,30 +47,40 @@ stages:
     #     codeCoverageTool: Cobertura
     #     summaryFileLocation: '$(Build.SourcesDirectory)/coverlet/reports/Cobertura.xml'
 
-    # - task: DotNetCoreCLI@2
-    #   displayName: 'dotnet publish'
-    #   inputs:
-    #     command: publish
-    #     arguments: '--configuration $(buildConfiguration)'
-    #     publishWebProjects: false
-    #     zipAfterPublish: false
-
-    # - task: CopyFiles@2
-    #   displayName: 'Copy Files to: $(build.artifactstagingdirectory)'
-    #   inputs:
-    #     SourceFolder: '$(build.sourcesdirectory)'
-    #     Contents: '**/bin/$(BuildConfiguration)/net5.0/publish/**'
-    #     TargetFolder: '$(build.artifactstagingdirectory)'
-
-    # - task: PublishBuildArtifacts@1
-    #   displayName: 'Publish Artifact: drop'
-    #   inputs:
-    #     PathtoPublish: '$(build.artifactstagingdirectory)'
-
     - task: DotNetCoreCLI@2
+      displayName: 'dotnet publish'
       inputs:
-        command: 'build'
+        command: publish
         arguments: '--configuration $(BuildConfiguration)'
+        publishWebProjects: false
+        zipAfterPublish: false
+
+    # Archive API binaries
+    - task: ArchiveFiles@2
+      inputs:
+        rootFolderOrFile: '$(Build.SourcesDirectory)/Api/bin/$(BuildConfiguration)/netcoreapp3.1/publish'
+        includeRootFolder: false
+        archiveType: 'zip' # Options: zip, 7z, tar, wim
+        archiveFile: '$(Build.ArtifactStagingDirectory)/api.zip'
+        #replaceExistingArchive: true
+        #verbose: # Optional
+        #quiet: # Optional
+
+    # Archive WebAssembly binaries
+    - task: ArchiveFiles@2
+      inputs:
+        rootFolderOrFile: '$(Build.SourcesDirectory)/Client/bin/$(BuildConfiguration)/net5.0/publish'
+        includeRootFolder: false
+        archiveType: 'zip' # Options: zip, 7z, tar, wim
+        archiveFile: '$(Build.ArtifactStagingDirectory)/client.zip'
+        #replaceExistingArchive: true
+        #verbose: # Optional
+        #quiet: # Optional
+
+    - task: PublishBuildArtifacts@1
+      displayName: 'Publish Artifact: drop'
+      inputs:
+        PathtoPublish: '$(build.artifactstagingdirectory)'
 
 - template: /.azuredevops/templates/stages-sync-with-github.yaml
   parameters:
