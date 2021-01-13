@@ -15,6 +15,8 @@ namespace Client.Services
         Task<AthleteModel> GetAthleteAsync();
 
         Task<string> GetUserDetailsAsync();
+
+        Task<string> GetApiVersionAsync();
     }
 
     public class DataService : IDataService
@@ -36,6 +38,11 @@ namespace Client.Services
             var response = await _httpClient.PostAsync(new Uri($"/api/connect", UriKind.Relative), new StringContent(json, UnicodeEncoding.UTF8, "application/json"));
 
             response.EnsureSuccessStatusCode();
+        }
+
+        public async Task<string> GetApiVersionAsync()
+        {
+            return await _httpClient.GetStringAsync(new Uri("/api/version", UriKind.Relative));
         }
 
         public async Task<AthleteModel> GetAthleteAsync()
