@@ -2,12 +2,12 @@ trigger:
   branches:
     include:
     - master
-    # - ci/*
-    # - bug/*
-    # - feature/*
-    # - ci-*
-    # - bug-*
-    # - feature-*
+    - ci/*
+    - bug/*
+    - feature/*
+    - ci-*
+    - bug-*
+    - feature-*
 
 stages:
 - stage: Build
