@@ -28,7 +28,7 @@ namespace Api.Functions
 
         [FunctionName("ConnectStravaApp")]
         [return: Table("LinkedAccounts")]
-        public async Task<LinkedAccount> Run(
+        public async Task<LinkedAccount> RunAsync(
             [HttpTrigger(AuthorizationLevel.Function, "post", Route = "connect")]
             [FromBody] Shared.Models.ConnectStravaApp connectStravaApp,
             HttpRequest req,
@@ -87,6 +87,5 @@ namespace Api.Functions
 
             return accessTokenModel;
         }
-
     }
 }

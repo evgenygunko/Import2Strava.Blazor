@@ -7,7 +7,7 @@ namespace Client.Pages
     public partial class ApiVersion
     {
         [Inject]
-        private IDataService DataService { get; set; }
+        public IDataService DataService { get; set; }
 
         public string Version { get; set; }
 

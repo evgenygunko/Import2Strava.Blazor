@@ -8,7 +8,7 @@ namespace Client.Pages
     public partial class Index
     {
         [Inject]
-        private IDataService DataService { get; set; }
+        public IDataService DataService { get; set; }
 
         public AthleteModel Athlete { get; set; }
 

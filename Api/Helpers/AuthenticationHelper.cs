@@ -36,7 +36,6 @@ namespace Api.Helpers
 
                     principal = JsonSerializer.Deserialize<ClientPrincipal>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
-
                     logger.LogInformation($"Found user: user id='{principal?.UserId}', user details='{principal?.UserDetails}', identity provider='{principal.IdentityProvider}'");
                 }
                 else

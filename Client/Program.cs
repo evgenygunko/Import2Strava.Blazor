@@ -7,7 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Client
 {
-    public class Program
+    public static class Program
     {
         public static async Task Main(string[] args)
         {

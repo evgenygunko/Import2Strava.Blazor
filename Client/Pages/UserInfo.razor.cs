@@ -8,7 +8,7 @@ namespace Client.Pages
     public partial class UserInfo
     {
         [Inject]
-        private IDataService ClientService { get; set; }
+        public IDataService ClientService { get; set; }
 
         public string UserDetails { get; set; }
 

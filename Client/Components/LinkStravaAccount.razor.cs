@@ -6,10 +6,10 @@ namespace Client.Components
     public partial class LinkStravaAccount
     {
         [Inject]
-        private IConfiguration Configuration { get; set; }
+        public IConfiguration Configuration { get; set; }
 
         [Inject]
-        private NavigationManager NavManager { get; set; }
+        public NavigationManager NavManager { get; set; }
 
         public string AuthorizationUrl
         {

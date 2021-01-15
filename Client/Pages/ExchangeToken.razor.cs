@@ -9,13 +9,13 @@ namespace Client.Pages
     public partial class ExchangeToken
     {
         [Inject]
-        private NavigationManager NavManager { get; set; }
+        public NavigationManager NavManager { get; set; }
 
         [Inject]
-        private IDataService DataService { get; set; }
+        public IDataService DataService { get; set; }
 
         [Inject]
-        private ILogger<ExchangeToken> Logger { get; set; }
+        public ILogger<ExchangeToken> Logger { get; set; }
 
         public string AuthorizationCode { get; set; }
 

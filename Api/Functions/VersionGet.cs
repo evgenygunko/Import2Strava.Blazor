@@ -7,7 +7,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Api.Functions
 {
-    public class VersionGet
+    public static class VersionGet
     {
         [FunctionName("VersionGet")]
         public static IActionResult Run(
