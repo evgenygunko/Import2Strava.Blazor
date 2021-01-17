@@ -1,8 +1,8 @@
 using System;
 using System.Threading.Tasks;
-using AzureStaticWebApps.Blazor.Authentication;
 using Client.Services;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Client
@@ -19,7 +19,11 @@ namespace Client
                 client.BaseAddress = new Uri(builder.Configuration["API_Prefix"] ?? builder.HostEnvironment.BaseAddress);
             });
 
-            builder.Services.AddStaticWebAppsAuthentication();
+            builder.Services.AddOidcAuthentication(options =>
+            {
+                builder.Configuration.Bind("Auth0", options.ProviderOptions);
+                options.ProviderOptions.ResponseType = "code";
+            });
 
             await builder.Build().RunAsync();
         }
