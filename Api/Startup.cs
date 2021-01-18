@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Reflection;
+using Api.Services;
 using Microsoft.Azure.Functions.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -20,6 +21,7 @@ namespace Api
                .Build();
 
             builder.Services.AddSingleton<IConfiguration>(config);
+            builder.Services.AddSingleton<IAuth0Authenticator, Auth0Authenticator>();
 
             builder.Services.AddHttpClient();
         }
