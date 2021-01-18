@@ -1,9 +1,9 @@
 ﻿<AuthorizeView>
     <Authorized>
         Hello, @context.User.Identity.Name!
-        <a href="#" @onclick="BeginSignOutAsync">Log out</a>
+        <MatButton OnClick="@BeginSignOutAsync" Label="Log out"></MatButton>
     </Authorized>
     <NotAuthorized>
-        <a href="authentication/login">Log in</a>
+        <MatButtonLink Href="authentication/login">Login</MatButtonLink>
     </NotAuthorized>
 </AuthorizeView>
