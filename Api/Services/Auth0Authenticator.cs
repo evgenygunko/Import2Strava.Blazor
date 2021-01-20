@@ -1,12 +1,12 @@
 ﻿using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
-using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
 using Api.Models.Exceptions;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Protocols;
@@ -17,7 +17,7 @@ namespace Api.Services
 {
     public interface IAuth0Authenticator
     {
-        Task<(ClaimsPrincipal User, SecurityToken ValidatedToken)> AuthenticateAsync(HttpRequestMessage requestMessage, ILogger log, CancellationToken cancellationToken);
+        Task<(ClaimsPrincipal User, SecurityToken ValidatedToken)> AuthenticateAsync(HttpRequest request, ILogger log, CancellationToken cancellationToken);
 
         string GetUserId(ClaimsPrincipal user);
     }
@@ -67,14 +67,14 @@ namespace Api.Services
         /// Throws an exception if the token fails to authenticate.
         /// This method has an asynchronous signature, but usually completes synchronously.
         /// </summary>
-        /// <param name="requestMessage">http request message.</param>
+        /// <param name="request">http request.</param>
         /// <param name="log">Instance of logger class.</param>
         /// <param name="cancellationToken">An optional cancellation token.</param>
-        public async Task<(ClaimsPrincipal User, SecurityToken ValidatedToken)> AuthenticateAsync(HttpRequestMessage requestMessage, ILogger log, CancellationToken cancellationToken)
+        public async Task<(ClaimsPrincipal User, SecurityToken ValidatedToken)> AuthenticateAsync(HttpRequest request, ILogger log, CancellationToken cancellationToken)
         {
             try
             {
-                AuthenticationHeaderValue header = requestMessage.Headers.Authorization;
+                AuthenticationHeaderValue header = AuthenticationHeaderValue.Parse(request.Headers["Authorization"]);
                 if (header == null || !string.Equals(header.Scheme, "Bearer", StringComparison.InvariantCultureIgnoreCase))
                 {
                     throw new InvalidOperationException("Authentication header does not use Bearer token.");

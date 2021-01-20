@@ -17,6 +17,8 @@ namespace Client.Pages
         [Inject]
         public ILogger<ExchangeToken> Logger { get; set; }
 
+        public string Error { get; set; }
+
         public string AuthorizationCode { get; set; }
 
         protected override async Task OnInitializedAsync()
@@ -27,10 +29,17 @@ namespace Client.Pages
             AuthorizationCode = queryStringParams["code"];
             Logger.LogInformation($"Received authorization code='{AuthorizationCode}'");
 
-            await DataService.ConnectStravaAppAsync(AuthorizationCode);
-            Logger.LogInformation($"Successfully connected Strava app");
+            try
+            {
+                await DataService.ConnectStravaAppAsync(AuthorizationCode);
+                Logger.LogInformation($"Successfully connected Strava app");
 
-            NavManager.NavigateTo("/");
+                NavManager.NavigateTo("/");
+            }
+            catch (Exception ex)
+            {
+                Error = "An error occurred: " + ex;
+            }
         }
     }
 }

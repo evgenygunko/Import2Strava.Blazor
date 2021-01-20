@@ -6,12 +6,14 @@ using System.Threading.Tasks;
 using Api.Models.Data;
 using Api.Models.Exceptions;
 using Api.Services;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
+using Newtonsoft.Json;
 
 namespace Api.Functions
 {
@@ -30,22 +32,24 @@ namespace Api.Functions
 
         [FunctionName("UserInfoGet")]
         public async Task<IActionResult> RunAsync(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "userinfo")] HttpRequestMessage req,
-            ILogger log,
+            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "userinfo")]
+            HttpRequest request,
+            ILogger logger,
             CancellationToken cancellationToken)
         {
             try
             {
                 // The "user" returned here is an actual ClaimsPrincipal with the claims that were in the access_token.
                 // The "token" is a SecurityToken that can be used to invoke services on the part of the user. E.g., create a Google Calendar event on the user's calendar.
-                (ClaimsPrincipal user, SecurityToken token) = await _auth0Authenticator.AuthenticateAsync(req, log, cancellationToken);
+                (ClaimsPrincipal user, SecurityToken token) = await _auth0Authenticator.AuthenticateAsync(request, logger, cancellationToken);
 
                 string userId = _auth0Authenticator.GetUserId(user);
-                log.LogInformation($"User authenticated, user id='{userId}'");
+                logger.LogInformation($"User authenticated, user id='{userId}'");
 
                 // Hit the auth0 user_info API and see what we get back about this user
-                Auth0UserInfo auth0UserInfo = await GetAuth0UserinfoAsync(req.Headers.Authorization);
-                log.LogInformation($"Got user info from auth0: '{auth0UserInfo}'");
+                var authorizationHeader = AuthenticationHeaderValue.Parse(request.Headers["Authorization"]);
+                Auth0UserInfo auth0UserInfo = await GetAuth0UserinfoAsync(authorizationHeader, logger, cancellationToken);
+                logger.LogInformation($"Got user info from auth0: '{auth0UserInfo}'");
 
                 return new OkObjectResult(auth0UserInfo);
             }
@@ -55,14 +59,18 @@ namespace Api.Functions
             }
         }
 
-        private async Task<Auth0UserInfo> GetAuth0UserinfoAsync(AuthenticationHeaderValue token)
+        private async Task<Auth0UserInfo> GetAuth0UserinfoAsync(AuthenticationHeaderValue token, ILogger logger, CancellationToken cancellationToken)
         {
             var request = new HttpRequestMessage(HttpMethod.Get, $"https://{_configuration["Auth0Domain"]}/userinfo");
             request.Headers.Authorization = token;
 
-            HttpResponseMessage result = await _httpClient.SendAsync(request);
+            HttpResponseMessage response = await _httpClient.SendAsync(request, cancellationToken);
 
-            return await result.Content.ReadAsAsync<Auth0UserInfo>();
+            string responseBody = await response.Content.ReadAsStringAsync();
+            logger.LogInformation($"Received token response from Auth0: '{responseBody}'");
+
+            Auth0UserInfo userInfo = JsonConvert.DeserializeObject<Auth0UserInfo>(responseBody);
+            return userInfo;
         }
     }
 }

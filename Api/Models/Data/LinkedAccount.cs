@@ -1,18 +1,13 @@
 ﻿using System;
+using Microsoft.Azure.Cosmos.Table;
 
 namespace Api.Models.Data
 {
-    public class LinkedAccount
+    public class LinkedAccount : TableEntity
     {
-        public string PartitionKey { get; set; }
+        public string IdpUserId { get; set; }
 
-        public string RowKey { get; set; }
-
-        public string UserId { get; set; }
-
-        public string UserDetails { get; set; }
-
-        public string IdentityProvider { get; set; }
+        public string IdpUserName { get; set; }
 
         public int StravaAccountId { get; set; }
 

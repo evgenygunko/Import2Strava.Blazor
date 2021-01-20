@@ -1,4 +1,13 @@
 ﻿@page "/exchange_token"
 @attribute [Authorize]
 
-<p><em>Please wait...</em></p>
+
+@if (Error != null)
+{
+    <div class="alert alert-danger" role="alert">@Error</div>
+    <div>Could not link Strava account, please return to Home view and try again.</div>
+}
+else
+{
+    <p><em>Please wait...</em></p>
+}
