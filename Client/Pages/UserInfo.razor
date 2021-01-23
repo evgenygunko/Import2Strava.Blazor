@@ -5,6 +5,7 @@
     <Authorized>
         @if (Error != null)
         {
+            <MatButton OnClick="@LoadUserInfoAsync" Label="Retry"></MatButton>
             <div class="alert alert-danger" role="alert">@Error</div>
         }
         else if (User == null)

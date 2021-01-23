@@ -17,15 +17,7 @@ namespace Client.Pages
 
         protected override async Task OnInitializedAsync()
         {
-            try
-            {
-                Error = null;
-                User = await DataService.GetUserInfoAsync();
-            }
-            catch (Exception ex)
-            {
-                Error = "An error occurred: " + ex;
-            }
+            await LoadUserInfoAsync();
         }
 
         private async Task UnlinkStravaAppAsync()
@@ -36,6 +28,19 @@ namespace Client.Pages
                 await DataService.UnlinkStravaAppAsync();
 
                 User.IsStravaAccountLinked = false;
+            }
+            catch (Exception ex)
+            {
+                Error = "An error occurred: " + ex;
+            }
+        }
+
+        private async Task LoadUserInfoAsync()
+        {
+            try
+            {
+                Error = null;
+                User = await DataService.GetUserInfoAsync();
             }
             catch (Exception ex)
             {
