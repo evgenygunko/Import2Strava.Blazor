@@ -13,6 +13,7 @@
         }
         else if (User.IsStravaAccountLinked)
         {
+            <MatButton OnClick="@UnlinkStravaAppAsync">Unlink Strava account</MatButton>
             <MatCard>
                 <MatCardContent Class="m-3">
                     <MatCardMedia ImageUrl="@User.PictureUrl" Style="width:140px;height:140px;"></MatCardMedia>

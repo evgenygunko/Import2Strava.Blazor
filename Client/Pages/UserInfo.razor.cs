@@ -27,5 +27,20 @@ namespace Client.Pages
                 Error = "An error occurred: " + ex;
             }
         }
+
+        private async Task UnlinkStravaAppAsync()
+        {
+            try
+            {
+                Error = null;
+                await DataService.UnlinkStravaAppAsync();
+
+                User.IsStravaAccountLinked = false;
+            }
+            catch (Exception ex)
+            {
+                Error = "An error occurred: " + ex;
+            }
+        }
     }
 }

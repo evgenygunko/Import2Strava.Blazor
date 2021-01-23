@@ -5,7 +5,6 @@ using System.Security.Claims;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Api.Helpers;
 using Api.Models;
 using Api.Models.Data;
 using Api.Models.Exceptions;
@@ -28,12 +27,14 @@ namespace Api.Functions
         private readonly HttpClient _httpClient;
         private readonly IConfiguration _configuration;
         private readonly IAuth0Authenticator _auth0Authenticator;
+        private readonly ILinkedAccountService _linkedAccountService;
 
-        public UserInfoGet(HttpClient httpClient, IConfiguration configuration, IAuth0Authenticator auth0Authenticator)
+        public UserInfoGet(HttpClient httpClient, IConfiguration configuration, IAuth0Authenticator auth0Authenticator, ILinkedAccountService linkedAccountService)
         {
             _httpClient = httpClient;
             _configuration = configuration;
             _auth0Authenticator = auth0Authenticator;
+            _linkedAccountService = linkedAccountService;
         }
 
         [FunctionName("UserInfoGet")]
@@ -55,7 +56,7 @@ namespace Api.Functions
 
                 UserInfoModel userInfoModel = new UserInfoModel();
 
-                LinkedAccount linkedAccount = await GetLinkedAccountAsync(userId, table, logger);
+                LinkedAccount linkedAccount = await _linkedAccountService.GetLinkedAccountAsync(userId, table, logger);
                 if (linkedAccount != null)
                 {
                     // validate that the access token has not expired and renew if needed
@@ -64,14 +65,17 @@ namespace Api.Functions
                     if (accessToken != null)
                     {
                         AthleteModel athlete = await GetAthleteAsync(accessToken, linkedAccount, table, logger, cancellationToken);
-                        logger.LogInformation($"Got athlete info from Strava: '{athlete}'");
+                        if (athlete != null)
+                        {
+                            logger.LogInformation($"Got athlete info from Strava: '{athlete}'");
 
-                        userInfoModel.FirstName = athlete.FirstName;
-                        userInfoModel.LastName = athlete.LastName;
-                        userInfoModel.Country = athlete.Country;
-                        userInfoModel.City = athlete.City;
-                        userInfoModel.PictureUrl = athlete.Profile;
-                        userInfoModel.IsStravaAccountLinked = true;
+                            userInfoModel.FirstName = athlete.FirstName;
+                            userInfoModel.LastName = athlete.LastName;
+                            userInfoModel.Country = athlete.Country;
+                            userInfoModel.City = athlete.City;
+                            userInfoModel.PictureUrl = athlete.Profile;
+                            userInfoModel.IsStravaAccountLinked = true;
+                        }
                     }
                 }
 
@@ -104,7 +108,7 @@ namespace Api.Functions
                 };
                 var json = JsonConvert.SerializeObject(refreshTokenModel);
 
-                HttpResponseMessage response = await _httpClient.PostAsync(new Uri($"https://www.strava.com/api/v3/oauth/token"), new StringContent(json, Encoding.UTF8, "application/json"), cancellationToken);
+                HttpResponseMessage response = await _httpClient.PostAsync(new Uri("https://www.strava.com/api/v3/oauth/token"), new StringContent(json, Encoding.UTF8, "application/json"), cancellationToken);
 
                 response.EnsureSuccessStatusCode();
 
@@ -133,23 +137,6 @@ namespace Api.Functions
             }
         }
 
-        private async Task<LinkedAccount> GetLinkedAccountAsync(string userId, CloudTable table, ILogger logger)
-        {
-            try
-            {
-                TableOperation retrieveOperation = TableOperation.Retrieve<LinkedAccount>(Constants.LinkedAccountPartitionKey, userId);
-                TableResult result = await table.ExecuteAsync(retrieveOperation);
-                LinkedAccount linkedAccount = result.Result as LinkedAccount;
-
-                return linkedAccount;
-            }
-            catch (StorageException ex)
-            {
-                logger.LogError(ex, "Cannot read linked account from the table storage");
-                return null;
-            }
-        }
-
         private async Task<AthleteModel> GetAthleteAsync(string token, LinkedAccount linkedAccount, CloudTable table, ILogger logger, CancellationToken cancellationToken)
         {
             try
@@ -158,6 +145,8 @@ namespace Api.Functions
                 request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
                 HttpResponseMessage response = await _httpClient.SendAsync(request, cancellationToken);
+
+                response.EnsureSuccessStatusCode();
 
                 string responseBody = await response.Content.ReadAsStringAsync();
                 logger.LogInformation($"Received response from Strava: '{responseBody}'");

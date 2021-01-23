@@ -12,6 +12,8 @@ namespace Client.Services
     {
         Task ConnectStravaAppAsync(string authorizationCode);
 
+        Task UnlinkStravaAppAsync();
+
         Task<UserInfoModel> GetUserInfoAsync();
 
         Task<string> GetApiVersionAsync();
@@ -34,6 +36,13 @@ namespace Client.Services
             var json = JsonConvert.SerializeObject(connectStravaApp);
 
             var response = await _httpClient.PostAsync(new Uri($"/api/connect", UriKind.Relative), new StringContent(json, UnicodeEncoding.UTF8, "application/json"));
+
+            response.EnsureSuccessStatusCode();
+        }
+
+        public async Task UnlinkStravaAppAsync()
+        {
+            var response = await _httpClient.PostAsync(new Uri($"/api/disconnect", UriKind.Relative), null);
 
             response.EnsureSuccessStatusCode();
         }

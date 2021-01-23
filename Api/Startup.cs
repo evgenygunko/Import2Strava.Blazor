@@ -22,6 +22,7 @@ namespace Api
 
             builder.Services.AddSingleton<IConfiguration>(config);
             builder.Services.AddSingleton<IAuth0Authenticator, Auth0Authenticator>();
+            builder.Services.AddSingleton<ILinkedAccountService, LinkedAccountService>();
 
             builder.Services.AddHttpClient();
         }
