@@ -1,4 +1,4 @@
-﻿namespace Shared.Models
+﻿namespace Api.Models
 {
     public class AthleteModel
     {

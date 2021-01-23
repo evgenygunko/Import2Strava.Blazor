@@ -12,9 +12,7 @@ namespace Client.Services
     {
         Task ConnectStravaAppAsync(string authorizationCode);
 
-        Task<AthleteModel> GetAthleteAsync();
-
-        Task<string> GetUserDetailsAsync();
+        Task<UserInfoModel> GetUserInfoAsync();
 
         Task<string> GetApiVersionAsync();
     }
@@ -45,21 +43,16 @@ namespace Client.Services
             return await _httpClient.GetStringAsync(new Uri("/api/version", UriKind.Relative));
         }
 
-        public async Task<AthleteModel> GetAthleteAsync()
+        public async Task<UserInfoModel> GetUserInfoAsync()
         {
-            HttpResponseMessage response = await _httpClient.GetAsync(new Uri($"/api/athlete/", UriKind.Relative));
+            HttpResponseMessage response = await _httpClient.GetAsync(new Uri($"/api/userinfo/", UriKind.Relative));
 
             response.EnsureSuccessStatusCode();
 
             string responseBody = await response.Content.ReadAsStringAsync();
 
-            AthleteModel athleteModel = JsonConvert.DeserializeObject<AthleteModel>(responseBody);
-            return athleteModel;
-        }
-
-        public async Task<string> GetUserDetailsAsync()
-        {
-            return await _httpClient.GetStringAsync(new Uri("/api/userinfo", UriKind.Relative));
+            UserInfoModel userInfo = JsonConvert.DeserializeObject<UserInfoModel>(responseBody);
+            return userInfo;
         }
     }
 }

@@ -1,6 +1,6 @@
 ﻿namespace Client.Pages
 {
-    public partial class Index
+    public partial class ApiVersion
     {
     }
 }

@@ -2,15 +2,16 @@
 using System.Threading.Tasks;
 using Client.Services;
 using Microsoft.AspNetCore.Components;
+using Shared.Models;
 
 namespace Client.Pages
 {
     public partial class UserInfo
     {
         [Inject]
-        public IDataService ClientService { get; set; }
+        public IDataService DataService { get; set; }
 
-        public string UserDetails { get; set; }
+        public UserInfoModel User { get; set; }
 
         public string Error { get; set; }
 
@@ -19,7 +20,7 @@ namespace Client.Pages
             try
             {
                 Error = null;
-                UserDetails = await ClientService.GetUserDetailsAsync();
+                User = await DataService.GetUserInfoAsync();
             }
             catch (Exception ex)
             {

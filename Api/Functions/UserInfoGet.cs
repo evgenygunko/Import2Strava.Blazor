@@ -1,9 +1,10 @@
+using System;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
-using Api.Models.Data;
+using Api.Models;
 using Api.Models.Exceptions;
 using Api.Services;
 using Microsoft.AspNetCore.Http;
@@ -14,6 +15,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
+using Shared.Models;
 
 namespace Api.Functions
 {
@@ -46,12 +48,27 @@ namespace Api.Functions
                 string userId = _auth0Authenticator.GetUserId(user);
                 logger.LogInformation($"User authenticated, user id='{userId}'");
 
-                // Hit the auth0 user_info API and see what we get back about this user
-                var authorizationHeader = AuthenticationHeaderValue.Parse(request.Headers["Authorization"]);
-                Auth0UserInfo auth0UserInfo = await GetAuth0UserinfoAsync(authorizationHeader, logger, cancellationToken);
-                logger.LogInformation($"Got user info from auth0: '{auth0UserInfo}'");
+                // todo: read the token from table, make a request to Strava and get Athlete profile
+                //var authorizationHeader = AuthenticationHeaderValue.Parse(request.Headers["Authorization"]);
+                //AthleteModel athlete = await GetAthleteAsync(authorizationHeader, logger, cancellationToken);
+                AthleteModel athlete = new AthleteModel()
+                {
+                    Id = 123,
+                    FirstName = "Benedict",
+                    LastName = "Cumberbatch",
+                    Profile = null
+                };
 
-                return new OkObjectResult(auth0UserInfo);
+                logger.LogInformation($"Got athlete info from Strava: '{athlete}'");
+
+                UserInfoModel userInfoModel = new UserInfoModel();
+                userInfoModel.FirstName = athlete.FirstName;
+                userInfoModel.LastName = athlete.LastName;
+                userInfoModel.Country = athlete.Country;
+                userInfoModel.PictureUrl = athlete.Profile;
+                userInfoModel.IsStravaAccountLinked = true;
+
+                return new OkObjectResult(userInfoModel);
             }
             catch (AuthException)
             {
@@ -59,18 +76,18 @@ namespace Api.Functions
             }
         }
 
-        private async Task<Auth0UserInfo> GetAuth0UserinfoAsync(AuthenticationHeaderValue token, ILogger logger, CancellationToken cancellationToken)
+        private async Task<AthleteModel> GetAthleteAsync(AuthenticationHeaderValue token, ILogger logger, CancellationToken cancellationToken)
         {
-            var request = new HttpRequestMessage(HttpMethod.Get, $"https://{_configuration["Auth0Domain"]}/userinfo");
+            var request = new HttpRequestMessage(HttpMethod.Get, new Uri("https://www.strava.com/api/athlete/"));
             request.Headers.Authorization = token;
 
             HttpResponseMessage response = await _httpClient.SendAsync(request, cancellationToken);
 
             string responseBody = await response.Content.ReadAsStringAsync();
-            logger.LogInformation($"Received token response from Auth0: '{responseBody}'");
+            logger.LogInformation($"Received response from Strava: '{responseBody}'");
 
-            Auth0UserInfo userInfo = JsonConvert.DeserializeObject<Auth0UserInfo>(responseBody);
-            return userInfo;
+            AthleteModel athleteModel = JsonConvert.DeserializeObject<AthleteModel>(responseBody);
+            return athleteModel;
         }
     }
 }
