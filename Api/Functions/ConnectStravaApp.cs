@@ -5,6 +5,7 @@ using System.Security.Claims;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Api.Helpers;
 using Api.Models;
 using Api.Models.Data;
 using Api.Services;
@@ -70,7 +71,7 @@ namespace Api.Functions
             };
 
             logger.LogInformation($"Saving access token for user: '{linkedAccount.IdpUserId}' '{linkedAccount.IdpUserName}'. Strava user:'{linkedAccount.StravaAccountId}' {linkedAccount.FirstName} {linkedAccount.LastName}");
-            linkedAccount.PartitionKey = "LinkedAccounts";
+            linkedAccount.PartitionKey = Constants.LinkedAccountPartitionKey;
             linkedAccount.RowKey = linkedAccount.IdpUserId;
             linkedAccount.ETag = "*";
 

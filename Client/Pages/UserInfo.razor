@@ -3,21 +3,25 @@
 
 <AuthorizeView>
     <Authorized>
-        @if (User == null)
+        @if (Error != null)
+        {
+            <div class="alert alert-danger" role="alert">@Error</div>
+        }
+        else if (User == null)
         {
             <p><em>Loading...</em></p>
         }
         else if (User.IsStravaAccountLinked)
         {
-            <MatCard class="demo-mat-card">
-                <MatCardContent>
-                    <MatCardMedia Wide="true" ImageUrl="@User.PictureUrl" Style="width:140px;height:140px;"></MatCardMedia>
-                    <div class="demo-mat-card-content">
-                        <MatHeadline6 class="demo-mat-card-clean-margin">
+            <MatCard>
+                <MatCardContent Class="m-3">
+                    <MatCardMedia ImageUrl="@User.PictureUrl" Style="width:140px;height:140px;"></MatCardMedia>
+                    <div>
+                        <MatHeadline6>
                             @User.FirstName @User.LastName
                         </MatHeadline6>
-                        <MatSubtitle2 class="demo-mat-card-clean-margin">
-                            @User.Country
+                        <MatSubtitle2>
+                            @User.Country @User.City
                         </MatSubtitle2>
                     </div>
                 </MatCardContent>
