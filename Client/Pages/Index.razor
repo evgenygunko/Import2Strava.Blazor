@@ -2,7 +2,40 @@
 
 <AuthorizeView>
     <Authorized>
-        <h3>Welcome to Import2Strava!</h3>
+        @if (Error != null)
+        {
+            <MatButton OnClick="@LoadUserInfoAsync" Label="Retry"></MatButton>
+            <div class="alert alert-danger" role="alert">@Error</div>
+        }
+        else if (User == null)
+        {
+            <p><em>Loading...</em></p>
+        }
+        else if (User.IsStravaAccountLinked)
+        {
+            <MatButton OnClick="@UnlinkStravaAppAsync">Unlink Strava account</MatButton>
+            <MatCard>
+                <MatCardContent Class="m-3">
+                    <MatCardMedia ImageUrl="@User.PictureUrl" Style="width:140px;height:140px;"></MatCardMedia>
+                    <div>
+                        <MatHeadline6>
+                            @User.FirstName @User.LastName
+                        </MatHeadline6>
+                        <MatSubtitle2>
+                            @User.Country @User.City
+                        </MatSubtitle2>
+                    </div>
+                </MatCardContent>
+            </MatCard>
+        }
+        else
+        {
+            <div class="alert alert-primary mt-4" role="alert">
+                Please connect Strava account
+            </div>
+
+            <LinkStravaAccount />
+        }
     </Authorized>
 
     <NotAuthorized>
