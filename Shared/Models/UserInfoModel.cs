@@ -13,5 +13,11 @@
         public string City { get; set; }
 
         public string PictureUrl { get; set; }
+
+        public int Runs { get; set; }
+
+        public int Swims { get; set; }
+
+        public int Rides { get; set; }
     }
 }

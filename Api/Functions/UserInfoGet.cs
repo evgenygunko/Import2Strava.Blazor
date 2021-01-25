@@ -54,7 +54,7 @@ namespace Api.Functions
                 string userId = _auth0Authenticator.GetUserId(user);
                 logger.LogInformation($"User authenticated, user id='{userId}'");
 
-                UserInfoModel userInfoModel = new UserInfoModel();
+                UserInfoModel userInfo = new UserInfoModel();
 
                 LinkedAccount linkedAccount = await _linkedAccountService.GetLinkedAccountAsync(userId, table, logger);
                 if (linkedAccount != null)
@@ -69,17 +69,28 @@ namespace Api.Functions
                         {
                             logger.LogInformation($"Got athlete info from Strava: '{athlete}'");
 
-                            userInfoModel.FirstName = athlete.FirstName;
-                            userInfoModel.LastName = athlete.LastName;
-                            userInfoModel.Country = athlete.Country;
-                            userInfoModel.City = athlete.City;
-                            userInfoModel.PictureUrl = athlete.Profile;
-                            userInfoModel.IsStravaAccountLinked = true;
+                            userInfo.FirstName = athlete.FirstName;
+                            userInfo.LastName = athlete.LastName;
+                            userInfo.Country = athlete.Country;
+                            userInfo.City = athlete.City;
+                            userInfo.PictureUrl = athlete.Profile;
+
+                            userInfo.IsStravaAccountLinked = true;
+                        }
+
+                        AthleteStatsModel stats = await GetAthleteStatsAsync(accessToken, linkedAccount, logger, cancellationToken);
+                        if (stats != null)
+                        {
+                            logger.LogInformation($"Got athlete stats from Strava: '{stats}'");
+
+                            userInfo.Runs = stats.AllRunsTotals.Count;
+                            userInfo.Swims = stats.AllSwimsTotals.Count;
+                            userInfo.Rides = stats.AllRidesTotals.Count;
                         }
                     }
                 }
 
-                return new OkObjectResult(userInfoModel);
+                return new OkObjectResult(userInfo);
             }
             catch (AuthException)
             {
@@ -168,6 +179,30 @@ namespace Api.Functions
                 }
 
                 return athleteModel;
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error occurred while requesting athlete info from Strava");
+                return null;
+            }
+        }
+
+        private async Task<AthleteStatsModel> GetAthleteStatsAsync(string token, LinkedAccount linkedAccount, ILogger logger, CancellationToken cancellationToken)
+        {
+            try
+            {
+                var request = new HttpRequestMessage(HttpMethod.Get, new Uri("https://" + $"www.strava.com/api/v3/athletes/{linkedAccount.StravaAccountId}/stats"));
+                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+                HttpResponseMessage response = await _httpClient.SendAsync(request, cancellationToken);
+
+                response.EnsureSuccessStatusCode();
+
+                string responseBody = await response.Content.ReadAsStringAsync();
+                logger.LogInformation($"Received response from Strava: '{responseBody}'");
+
+                AthleteStatsModel statsModel = JsonConvert.DeserializeObject<AthleteStatsModel>(responseBody);
+                return statsModel;
             }
             catch (Exception ex)
             {
