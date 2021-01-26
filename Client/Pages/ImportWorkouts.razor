@@ -1,3 +1,31 @@
 ﻿@page "/importworkouts"
+@attribute [Authorize]
 
-<p>Not implemented yet</p>
+<p>Select Endomondo archive:</p>
+
+@if (Error != null)
+{
+    <div class="alert alert-danger" role="alert">@Error</div>
+}
+
+<MatFileUpload OnChange="@FilesReady" Label="Drop a single file here or Browse"></MatFileUpload>
+
+<MatSubtitle2 Class="m-2">@SelectedFile</MatSubtitle2>
+
+<MatButton OnClick="@UploadArchiveAsync" Label="Upload" Disabled="@IsFileNotSelected" Class="my-2"></MatButton>
+
+@if (IsUploading)
+{
+    <div>
+        <em>Uploading...</em>
+    </div>
+    <MatProgressBar Indeterminate="true" Reversed="false" Class="mt-3"></MatProgressBar>
+}
+
+@if (IsParsing)
+{
+    <div>
+        <em>Parsing workouts...</em>
+    </div>
+    <MatProgressBar Indeterminate="true" Reversed="false" Class="mt-3"></MatProgressBar>
+}
